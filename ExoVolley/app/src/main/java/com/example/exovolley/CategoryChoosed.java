@@ -1,6 +1,7 @@
 package com.example.exovolley;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,16 +11,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -32,13 +31,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,64 +48,101 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class CategoryChoosed extends AppCompatActivity implements SensorEventListener {
-
-    URL url;
-    private List<Post> posts;
-    private PostAdapter adapter;
-    RecyclerView recyclerView;
-    private RecyclerView.LayoutManager manager;
-
-    String newString, titre;
-
     private static final String PREFERENCES = "Prefs" ;
     private static final  String KEY_THEME = "keyTheme";
 
+    private URL url;
+    private List<Post> posts;
+    private PostAdapter adapter;
+    private RecyclerView recyclerView;
+
+    private String newString;
+    private String titre;
+
+
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private RecyclerView.LayoutManager manager;
 
     private SensorManager sensorManager;
     private Sensor sensor;
 
     private float lux;
-    private Boolean tmpTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialisationVariable();
 
+        initPrefs();
         if(sharedPreferences.getBoolean(KEY_THEME, false)){
             setTheme(R.style.NightTheme);
         }
+
         setContentView(R.layout.activity_category_choosed);
+
+        init();
+        setAdapterManager();
+        getExtra();
+        changeTitre();
+        getUrl();
+        checkPermission();
+        checkHttps();
+        dontCheckCert();
+        sendAndRequestResponse();
+    }
+
+    private void initPrefs(){
+        sharedPreferences = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+    }
+
+    private void init(){
+        adapter = new PostAdapter(posts, this);
+        manager = new LinearLayoutManager(getApplicationContext());
+
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        recyclerView = (RecyclerView) findViewById(R.id.rcvCategoryChoosed);
+        recyclerView = findViewById(R.id.rcvCategoryChoosed);
         posts = new ArrayList<>();
+    }
 
-        setAdapterManager();
+    private void setAdapterManager() {
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+    }
 
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if (extras == null) {
-                newString = null;
-            } else {
-                newString = extras.getString("STRING_I_NEED");
-                titre = extras.getString("letitre");
-            }
-        } else {
-            newString = (String) savedInstanceState.getSerializable("STRING_I_NEED");
-        }
-        Titre();
-        //
+    private void getExtra(){
+        Bundle extras = getIntent().getExtras();
+        newString = extras != null ? extras.getString("STRING_I_NEED") : null;
+        titre = extras != null ? extras.getString("TITLE") : null;
+    }
+
+    private void changeTitre() {
+        TextView t = findViewById(R.id.txtTitreCategoryChoosed);
+        t.setText(titre);
+    }
+
+    private void getUrl(){
         try {
             url = new URL("https://10.0.2.2:44303/api/post/cat" + newString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        checkPermission();
-        HttpURLConnection http = null;
+    }
 
+    private void checkPermission() {
+        if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED)) {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    private void checkHttps(){
         if (url.getProtocol().toLowerCase().equals("https")) {
             trustAllHosts();
             HttpsURLConnection https = null;
@@ -117,16 +151,12 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            assert https != null;
             https.setHostnameVerifier(DO_NOT_VERIFY);
-            http = https;
-        } else {
-            try {
-                http = (HttpURLConnection) url.openConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+    }
 
+    private void dontCheckCert(){
         HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
         SSLContext context = null;
         try {
@@ -135,12 +165,12 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
             e.printStackTrace();
         }
         try {
+            assert context != null;
             context.init(null, new X509TrustManager[]{new NullX509TrustManager()}, new SecureRandom());
         } catch (KeyManagementException e) {
             e.printStackTrace();
         }
         HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
-        sendAndRequestResponse();
     }
 
     public void sendAndRequestResponse() {
@@ -183,20 +213,11 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
 
     }
 
-    private void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED)) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-                finish();
-            }
-        }
-    }
+
 
     // always verify the host - dont check for certificate
     final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+        @SuppressLint("BadHostnameVerifier")
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
@@ -212,12 +233,12 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
                 return new java.security.cert.X509Certificate[]{};
             }
 
-            public void checkClientTrusted(X509Certificate[] chain,
-                                           String authType) throws CertificateException {
+            @SuppressLint("TrustAllX509TrustManager")
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
             }
 
-            public void checkServerTrusted(X509Certificate[] chain,
-                                           String authType) throws CertificateException {
+            @SuppressLint("TrustAllX509TrustManager")
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
             }
         }};
 
@@ -232,52 +253,16 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    private void setAdapterManager() {
 
-        adapter = new PostAdapter(posts, this);
-        manager = new LinearLayoutManager(getApplicationContext());
-
-        recyclerView.setLayoutManager(manager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(adapter);
-
-
-        recyclerView.addOnItemTouchListener(new RecyclerViewTouchListener(this, recyclerView, new RecyclerViewTouchListener.ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-
-            }
-        }));
-    }
-
-    private void Titre() {
-        TextView t = findViewById(R.id.txtTitreCategoryChoosed);
-        t.setText(titre);
-    }
-
-    private void initialisationVariable(){
-        sharedPreferences = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-    }
 
     private void changeTheme(){
-        if(lux < 100){
-            tmpTheme = true;
-        } else {
-            tmpTheme = false;
-        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        boolean tmpTheme;
+        tmpTheme = lux < 100;
 
         if(tmpTheme != sharedPreferences.getBoolean(KEY_THEME, false)){
             editor.putBoolean(KEY_THEME, tmpTheme);
-            editor.commit();
+            editor.apply();
             recreate();
         }
     }
@@ -289,6 +274,5 @@ public class CategoryChoosed extends AppCompatActivity implements SensorEventLis
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

@@ -6,14 +6,9 @@ public class Category {
     private String description;
     private String picture;
 
-    public Category() {
-    }
+    Category() {}
 
-    public Category(int id) {
-        this.id = id;
-    }
-
-    public Category(int id, String name, String description, String picture) {
+    Category(int id, String name, String description, String picture) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -36,19 +31,19 @@ public class Category {
         this.name = name;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    void setDescription(String description) {
         this.description = description;
     }
 
-    public String getPicture() {
+    String getPicture() {
         return picture;
     }
 
-    public void setPicture(String picture) {
+    void setPicture(String picture) {
         this.picture = picture;
     }
 

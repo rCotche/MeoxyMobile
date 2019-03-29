@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="113dp"
-        android:text="Web Api"
+        android:text="@string/web_api"
         android:textSize="50sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,14 +30,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtDisplay"
         app:layout_constraintVertical_bias="0.358" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="test"
-        android:text="Button"
-        tools:layout_editor_absoluteX="324dp"
-        tools:layout_editor_absoluteY="18dp" />
 
 </android.support.constraint.ConstraintLayout>

@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">ExoVolley</string>
+    <string name="app_name">Meoxy</string>
     <string name="title_activity_profile_user">profile_user</string>
+    <string name="web_api">Meoxy</string>
+    <string name="username">Username</string>
+    <string name="back_button">Back Button</string>
+    <string name="follow_user">Follow User</string>
+    <string name="biography">Je suis le testeur ! Venez voir mon application !</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.exovolley;
 
-import java.security.cert.CertificateException;
+import android.annotation.SuppressLint;
+
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509TrustManager;
@@ -17,9 +18,10 @@ public class NullX509TrustManager implements X509TrustManager {
      * @param authType
      *            authentication type
      */
+    @SuppressLint("TrustAllX509TrustManager")
     @Override
     public void checkClientTrusted(final X509Certificate[] chain,
-                                   final String authType) throws CertificateException {
+                                   final String authType) {
         // Does nothing
     }
 
@@ -31,9 +33,10 @@ public class NullX509TrustManager implements X509TrustManager {
      * @param authType
      *            authentication type
      */
+    @SuppressLint("TrustAllX509TrustManager")
     @Override
     public void checkServerTrusted(final X509Certificate[] chain,
-                                   final String authType) throws CertificateException {
+                                   final String authType) {
         // Does nothing
     }
 

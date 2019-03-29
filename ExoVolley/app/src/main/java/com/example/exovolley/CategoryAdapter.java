@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Space;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -17,11 +16,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.MyView
     private List<Category> categories;
     private Context mContext;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView Titre, Bio, id;
-        public ImageView imageView;
+    class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView Titre, Bio, id;
+        ImageView imageView;
 
-        public MyViewHolder(View view) {
+        MyViewHolder(View view) {
             super(view);
 
             Titre = view.findViewById(R.id.txtTitre);
@@ -31,13 +30,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.MyView
         }
     }
 
-    public CategoryAdapter(List<Category> categoryList, Context context) {
+    CategoryAdapter(List<Category> categoryList, Context context) {
         this.categories = categoryList;
         this.mContext = context;
-    }
-
-    public CategoryAdapter() {
-        super();
     }
 
     @Override

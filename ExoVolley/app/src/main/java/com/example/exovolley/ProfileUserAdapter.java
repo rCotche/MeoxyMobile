@@ -13,14 +13,13 @@ import java.util.List;
 public class ProfileUserAdapter extends RecyclerView.Adapter<ProfileUserAdapter.MyViewHolder> {
     private List<Category> categories;
     private Context context;
-    private String pictureName;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
-        public TextView title;
-        public TextView description;
-        public ImageView imageView;
+    class MyViewHolder extends RecyclerView.ViewHolder{
+        TextView title;
+        TextView description;
+        ImageView imageView;
 
-        public MyViewHolder(View view) {
+        MyViewHolder(View view) {
             super(view);
 
             description = view.findViewById(R.id.lblDescription);
@@ -29,7 +28,7 @@ public class ProfileUserAdapter extends RecyclerView.Adapter<ProfileUserAdapter.
         }
     }
 
-    public ProfileUserAdapter(List<Category> categoryList, Context context){
+    ProfileUserAdapter(List<Category> categoryList, Context context){
         this.categories = categoryList;
         this.context = context;
     }
@@ -43,7 +42,7 @@ public class ProfileUserAdapter extends RecyclerView.Adapter<ProfileUserAdapter.
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
         Category category= categories.get(i);
-        pictureName = category.getPicture();
+        String pictureName = category.getPicture();
 
         int resid = this.context.getResources().getIdentifier(pictureName, "drawable", this.context.getPackageName());
 

@@ -8,37 +8,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private List<Post> posts;
-    private RecyclerView post;
-    private RecyclerView.Adapter adapter;
-    private RecyclerView.LayoutManager manager;
-    private RecyclerView recyclerView;
     private Context myContext;
 
-    public PostAdapter(List<Post> postList, Context context) {
+    PostAdapter(List<Post> postList, Context context) {
         this.posts = postList;
         this.myContext = context;
     }
 
-    public PostAdapter() {
-        super();
-    }
-
     public class ViewHolder extends RecyclerView.ViewHolder
     {
-        public final View view;
-        public RecyclerView post;
-        public ImageView image;
-        public TextView description;
+        final View view;
+        ImageView image;
+        TextView description;
         public TextView name;
 
-        public ViewHolder(View v)
+        ViewHolder(View v)
         {
             super(v);
             this.view = v;
